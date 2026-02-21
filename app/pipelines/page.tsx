@@ -27,11 +27,14 @@ export default async function PipelinesPage({
 }) {
   const { status } = await searchParams;
 
-  const dbPipelines = await prisma.pipeline.findMany({
-    where: status ? { status } : undefined,
-    include: { runs: { orderBy: { startedAt: "desc" }, take: 1 } },
-    orderBy: { createdAt: "asc" },
-  });
+  const [dbPipelines, totalCount] = await Promise.all([
+    prisma.pipeline.findMany({
+      where: status ? { status } : undefined,
+      include: { runs: { orderBy: { startedAt: "desc" }, take: 1 } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.pipeline.count(),
+  ]);
 
   const allRuns = await prisma.pipelineRun.findMany({
     where: { pipelineId: { in: dbPipelines.map((p) => p.id) } },
@@ -90,8 +93,6 @@ export default async function PipelinesPage({
         : null,
     };
   });
-
-  const totalCount = await prisma.pipeline.count();
 
   return (
     <>

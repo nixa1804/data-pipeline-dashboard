@@ -46,14 +46,15 @@ export default async function AlertsPage({
 }) {
   const { status } = await searchParams;
 
-  const alerts = await prisma.alert.findMany({
-    where: status ? { status } : undefined,
-    include: { pipeline: { select: { name: true } } },
-    orderBy: { triggeredAt: "desc" },
-  });
-
-  const activeCount = await prisma.alert.count({ where: { status: "active" } });
-  const totalCount = await prisma.alert.count();
+  const [alerts, activeCount, totalCount] = await Promise.all([
+    prisma.alert.findMany({
+      where: status ? { status } : undefined,
+      include: { pipeline: { select: { name: true } } },
+      orderBy: { triggeredAt: "desc" },
+    }),
+    prisma.alert.count({ where: { status: "active" } }),
+    prisma.alert.count(),
+  ]);
 
   return (
     <>

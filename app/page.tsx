@@ -23,18 +23,52 @@ export default async function DashboardPage() {
   const since24h = subHours(now, 24);
   const since7d = subDays(now, 7);
 
-  // Fetch all pipelines with latest run
-  const dbPipelines = await prisma.pipeline.findMany({
-    include: {
-      runs: { orderBy: { startedAt: "desc" }, take: 1 },
-    },
-    orderBy: { createdAt: "asc" },
-  });
-
-  // Fetch all runs for success rate + avg duration calculation
-  const allRuns = await prisma.pipelineRun.findMany({
-    select: { pipelineId: true, status: true, durationMs: true },
-  });
+  const [
+    dbPipelines,
+    allRuns,
+    dbAlerts,
+    failedRuns24h,
+    runs7d,
+    finishedRuns,
+    activeAlerts,
+    latencyRuns,
+    volumeRuns,
+  ] = await Promise.all([
+    prisma.pipeline.findMany({
+      include: { runs: { orderBy: { startedAt: "desc" }, take: 1 } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.pipelineRun.findMany({
+      select: { pipelineId: true, status: true, durationMs: true },
+    }),
+    prisma.alert.findMany({
+      include: { pipeline: { select: { name: true } } },
+      orderBy: { triggeredAt: "desc" },
+    }),
+    prisma.pipelineRun.count({
+      where: { status: "failed", startedAt: { gte: since24h } },
+    }),
+    prisma.pipelineRun.findMany({
+      where: {
+        startedAt: { gte: since7d },
+        status: { notIn: ["running", "skipped"] },
+      },
+      select: { status: true },
+    }),
+    prisma.pipelineRun.findMany({
+      where: { durationMs: { not: null }, status: "success" },
+      select: { durationMs: true },
+    }),
+    prisma.alert.count({ where: { status: "active" } }),
+    prisma.pipelineRun.findMany({
+      where: { startedAt: { gte: since24h }, durationMs: { not: null } },
+      select: { startedAt: true, durationMs: true },
+    }),
+    prisma.pipelineRun.findMany({
+      where: { startedAt: { gte: since7d } },
+      select: { startedAt: true, status: true },
+    }),
+  ]);
 
   const runsByPipeline = new Map<string, typeof allRuns>();
   for (const run of allRuns) {
@@ -90,12 +124,6 @@ export default async function DashboardPage() {
     };
   });
 
-  // Fetch alerts with pipeline names
-  const dbAlerts = await prisma.alert.findMany({
-    include: { pipeline: { select: { name: true } } },
-    orderBy: { triggeredAt: "desc" },
-  });
-
   const alerts: Alert[] = dbAlerts.map((a) => ({
     id: a.id,
     pipelineId: a.pipelineId,
@@ -107,28 +135,12 @@ export default async function DashboardPage() {
     resolvedAt: a.resolvedAt?.toISOString() ?? null,
   }));
 
-  // Stats
-  const failedRuns24h = await prisma.pipelineRun.count({
-    where: { status: "failed", startedAt: { gte: since24h } },
-  });
-
-  const runs7d = await prisma.pipelineRun.findMany({
-    where: {
-      startedAt: { gte: since7d },
-      status: { notIn: ["running", "skipped"] },
-    },
-    select: { status: true },
-  });
   const success7d = runs7d.filter((r) => r.status === "success").length;
   const successRate7d =
     runs7d.length > 0
       ? Math.round((success7d / runs7d.length) * 1000) / 10
       : 100;
 
-  const finishedRuns = await prisma.pipelineRun.findMany({
-    where: { durationMs: { not: null }, status: "success" },
-    select: { durationMs: true },
-  });
   const avgLatencyMs =
     finishedRuns.length > 0
       ? Math.round(
@@ -136,10 +148,6 @@ export default async function DashboardPage() {
             finishedRuns.length
         )
       : 0;
-
-  const activeAlerts = await prisma.alert.count({
-    where: { status: "active" },
-  });
 
   const stats = {
     totalPipelines: dbPipelines.length,
@@ -149,12 +157,6 @@ export default async function DashboardPage() {
     avgLatencyMs,
     activeAlerts,
   };
-
-  // Latency trend — last 24 hours, one point per hour
-  const latencyRuns = await prisma.pipelineRun.findMany({
-    where: { startedAt: { gte: since24h }, durationMs: { not: null } },
-    select: { startedAt: true, durationMs: true },
-  });
 
   const latencyTrend = Array.from({ length: 24 }, (_, i) => {
     const hour = new Date(now);
@@ -183,12 +185,6 @@ export default async function DashboardPage() {
       latencyMs: avg ?? 0,
       p95Ms: p95 ?? 0,
     };
-  });
-
-  // Run volume — last 7 days
-  const volumeRuns = await prisma.pipelineRun.findMany({
-    where: { startedAt: { gte: since7d } },
-    select: { startedAt: true, status: true },
   });
 
   const runVolume = Array.from({ length: 7 }, (_, i) => {
