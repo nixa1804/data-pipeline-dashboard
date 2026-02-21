@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Pipeline {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   // active, inactive, deprecated
+  schedule    String   // cron expression e.g. "0 */6 * * *"
+  source      String
+  destination String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  runs   PipelineRun[]
+  alerts Alert[]
+}
+
+model PipelineRun {
+  id            String    @id @default(cuid())
+  pipelineId    String
+  pipeline      Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  status        String    // running, success, failed, skipped
+  startedAt     DateTime
+  finishedAt    DateTime?
+  durationMs    Int?
+  rowsProcessed Int?
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+
+  @@index([pipelineId])
+  @@index([startedAt])
+}
+
+model Alert {
+  id          String    @id @default(cuid())
+  pipelineId  String?
+  pipeline    Pipeline? @relation(fields: [pipelineId], references: [id], onDelete: SetNull)
+  severity    String    // critical, warning, info
+  message     String
+  status      String    // active, acknowledged, resolved
+  triggeredAt DateTime  @default(now())
+  resolvedAt  DateTime?
+
+  @@index([status])
+  @@index([triggeredAt])
+}
