@@ -1,7 +1,31 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/rate-limit";
 
-export async function GET() {
+function getIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+export async function GET(req: NextRequest) {
+  const { success, remaining, resetAt } = rateLimit(getIp(req));
+
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Remaining": "0",
+        },
+      }
+    );
+  }
+
   const pipelines = await prisma.pipeline.findMany({
     include: {
       runs: {
@@ -12,7 +36,6 @@ export async function GET() {
     orderBy: { createdAt: "asc" },
   });
 
-  // Calculate successRate and avgDurationMs from all runs per pipeline
   const pipelineIds = pipelines.map((p) => p.id);
   const allRuns = await prisma.pipelineRun.findMany({
     where: { pipelineId: { in: pipelineIds } },
@@ -31,8 +54,13 @@ export async function GET() {
     const runs = runsByPipeline.get(p.id) ?? [];
     const finished = runs.filter((r) => r.status !== "running" && r.status !== "skipped");
     const succeeded = finished.filter((r) => r.status === "success");
-    const successRate = finished.length > 0 ? (succeeded.length / finished.length) * 100 : null;
-    const durationsMs = runs.filter((r) => r.durationMs != null).map((r) => r.durationMs as number);
+    const successRate =
+      finished.length > 0
+        ? Math.round((succeeded.length / finished.length) * 1000) / 10
+        : null;
+    const durationsMs = runs
+      .filter((r) => r.durationMs != null)
+      .map((r) => r.durationMs as number);
     const avgDurationMs =
       durationsMs.length > 0
         ? Math.round(durationsMs.reduce((a, b) => a + b, 0) / durationsMs.length)
@@ -50,7 +78,7 @@ export async function GET() {
       destination: p.destination,
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
-      successRate: successRate != null ? Math.round(successRate * 10) / 10 : null,
+      successRate,
       avgDurationMs,
       lastRun: lastRun
         ? {
@@ -68,5 +96,7 @@ export async function GET() {
     };
   });
 
-  return NextResponse.json(result);
+  return NextResponse.json(result, {
+    headers: { "X-RateLimit-Remaining": String(remaining) },
+  });
 }
