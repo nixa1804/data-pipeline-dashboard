@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatDistanceToNow, format } from "date-fns";
-import { ArrowLeft, ArrowRight, Clock, Rows3, Calendar } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Calendar } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Badge from "@/components/ui/Badge";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
@@ -10,6 +11,23 @@ import type { RunStatus, Alert } from "@/types";
 import clsx from "clsx";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const pipeline = await prisma.pipeline.findUnique({
+    where: { id },
+    select: { name: true, description: true },
+  });
+  if (!pipeline) return { title: "Pipeline not found" };
+  return {
+    title: pipeline.name,
+    description: pipeline.description ?? undefined,
+  };
+}
 
 function formatMs(ms: number) {
   if (ms < 1000) return `${ms} ms`;

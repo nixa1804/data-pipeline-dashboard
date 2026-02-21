@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Alerts",
+  description: "Track active, acknowledged and resolved pipeline alerts.",
+};
 import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Info, XCircle } from "lucide-react";
 import Header from "@/components/layout/Header";

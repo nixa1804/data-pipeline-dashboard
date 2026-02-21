@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Header from "@/components/layout/Header";
+
+export const metadata: Metadata = {
+  title: "Metrics",
+  description: "Historical pipeline performance — latency trends and run volume over time.",
+};
 import LatencyChart from "@/components/dashboard/LatencyChart";
 import RunVolumeChart from "@/components/dashboard/RunVolumeChart";
 import { prisma } from "@/lib/db";

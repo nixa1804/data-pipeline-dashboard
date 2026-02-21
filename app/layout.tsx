@@ -14,8 +14,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pipeline Monitor",
-  description: "Real-time ETL pipeline observability dashboard",
+  title: {
+    default: "Pipeline Monitor",
+    template: "%s | Pipeline Monitor",
+  },
+  description: "Real-time ETL pipeline observability dashboard — monitor pipeline health, run history, latency trends and alerts in one place.",
+  openGraph: {
+    title: "Pipeline Monitor",
+    description: "Real-time ETL pipeline observability dashboard.",
+    type: "website",
+    locale: "en_US",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
