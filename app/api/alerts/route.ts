@@ -1,7 +1,22 @@
 import { NextResponse } from "next/server";
-import { mockAlerts } from "@/lib/mock-data";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
-  // TODO: replace with real DB query via prisma once Docker DB is running
-  return NextResponse.json(mockAlerts);
+  const alerts = await prisma.alert.findMany({
+    include: { pipeline: { select: { name: true } } },
+    orderBy: { triggeredAt: "desc" },
+  });
+
+  const result = alerts.map((a) => ({
+    id: a.id,
+    pipelineId: a.pipelineId,
+    pipelineName: a.pipeline?.name ?? null,
+    severity: a.severity,
+    message: a.message,
+    status: a.status,
+    triggeredAt: a.triggeredAt.toISOString(),
+    resolvedAt: a.resolvedAt?.toISOString() ?? null,
+  }));
+
+  return NextResponse.json(result);
 }
