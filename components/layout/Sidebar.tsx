@@ -88,7 +88,7 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="px-5 py-4 border-t border-white/5">
-          <p className="text-xs text-zinc-600">v0.1.0 · dev</p>
+          <p className="text-xs text-zinc-600">v0.1.0</p>
         </div>
       </aside>
     </>
