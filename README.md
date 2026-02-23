@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pipeline Monitor
 
-## Getting Started
+Real-time ETL pipeline observability dashboard. Monitor pipeline health, run history, latency trends, and alerts in one place.
 
-First, run the development server:
+## Features
+
+- **Dashboard** — overview stats, latency trend (24h), run volume (7d), recent pipeline cards and alerts
+- **Pipelines** — list of all pipelines with status filter, success rate, avg duration, last run info
+- **Alerts** — alert log with severity levels (critical, warning, info) and status tracking
+- **Metrics** — historical charts for latency and run volume with key stats
+- **Settings** — configurable refresh interval and alert thresholds, persisted in localStorage
+- Responsive layout with mobile sidebar drawer
+- Auto-refresh with configurable interval
+
+## Tech Stack
+
+- [Next.js 16](https://nextjs.org/) — App Router, server components, force-dynamic rendering
+- [Prisma 7](https://www.prisma.io/) — ORM with PostgreSQL adapter
+- [Neon](https://neon.tech/) — serverless PostgreSQL
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- [Recharts](https://recharts.org/) — latency and volume charts
+- [Vercel](https://vercel.com/) — hosting + analytics
+
+## Database Schema
+
+| Model | Description |
+|---|---|
+| `Pipeline` | ETL pipeline definition (name, status, schedule, source, destination) |
+| `PipelineRun` | Individual run record (status, duration, rows processed, error) |
+| `Alert` | Alert triggered for a pipeline (severity, status, timestamps) |
+
+## Local Development
+
+**Prerequisites:** Node.js 20+, PostgreSQL (or use Neon connection string directly)
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy env file and fill in your DATABASE_URL
+cp .env.example .env.local
+
+# Push schema to database
+npx prisma db push
+
+# Seed with demo data
+npm run db:seed
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> `.env.local` takes priority over `.env` in Next.js. The seed script reads `.env.local` first, so both the app and seed always use the same database.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment (Vercel)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Push to `main` — Vercel auto-deploys on every push
+2. Set `DATABASE_URL` in Vercel project settings → Environment Variables
+3. Seed production database once if needed:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+DATABASE_URL="your-production-url" npm run db:seed
+```
 
-## Deploy on Vercel
+## API Routes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/pipelines` | GET | List pipelines (supports `?status=` filter) |
+| `/api/alerts` | GET | List alerts (supports `?status=` filter) |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Both routes are rate-limited per IP and include HTTP security headers.
+
+## Scripts
+
+```bash
+npm run dev        # Start development server
+npm run build      # Production build
+npm run db:seed    # Seed database with demo data
+```
