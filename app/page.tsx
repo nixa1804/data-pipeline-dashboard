@@ -23,17 +23,7 @@ export default async function DashboardPage() {
   const since24h = subHours(now, 24);
   const since7d = subDays(now, 7);
 
-  const [
-    dbPipelines,
-    allRuns,
-    dbAlerts,
-    failedRuns24h,
-    runs7d,
-    finishedRuns,
-    activeAlerts,
-    latencyRuns,
-    volumeRuns,
-  ] = await Promise.all([
+  const [dbPipelines, allRuns, runs7d, dbAlerts] = await Promise.all([
     prisma.pipeline.findMany({
       include: { runs: { orderBy: { startedAt: "desc" }, take: 1 } },
       orderBy: { createdAt: "asc" },
@@ -41,34 +31,41 @@ export default async function DashboardPage() {
     prisma.pipelineRun.findMany({
       select: { pipelineId: true, status: true, durationMs: true },
     }),
+    prisma.pipelineRun.findMany({
+      where: { startedAt: { gte: since7d } },
+      select: { startedAt: true, status: true, durationMs: true },
+    }),
     prisma.alert.findMany({
       include: { pipeline: { select: { name: true } } },
       orderBy: { triggeredAt: "desc" },
     }),
-    prisma.pipelineRun.count({
-      where: { status: "failed", startedAt: { gte: since24h } },
-    }),
-    prisma.pipelineRun.findMany({
-      where: {
-        startedAt: { gte: since7d },
-        status: { notIn: ["running", "skipped"] },
-      },
-      select: { status: true },
-    }),
-    prisma.pipelineRun.findMany({
-      where: { durationMs: { not: null }, status: "success" },
-      select: { durationMs: true },
-    }),
-    prisma.alert.count({ where: { status: "active" } }),
-    prisma.pipelineRun.findMany({
-      where: { startedAt: { gte: since24h }, durationMs: { not: null } },
-      select: { startedAt: true, durationMs: true },
-    }),
-    prisma.pipelineRun.findMany({
-      where: { startedAt: { gte: since7d } },
-      select: { startedAt: true, status: true },
-    }),
   ]);
+
+  const failedRuns24h = runs7d.filter(
+    (r) => r.startedAt >= since24h && r.status === "failed"
+  ).length;
+
+  const runs7dFinished = runs7d.filter(
+    (r) => r.status !== "running" && r.status !== "skipped"
+  );
+  const success7d = runs7dFinished.filter((r) => r.status === "success").length;
+  const successRate7d =
+    runs7dFinished.length > 0
+      ? Math.round((success7d / runs7dFinished.length) * 1000) / 10
+      : 100;
+
+  const successfulRuns = allRuns.filter(
+    (r) => r.status === "success" && r.durationMs != null
+  );
+  const avgLatencyMs =
+    successfulRuns.length > 0
+      ? Math.round(
+          successfulRuns.reduce((a, b) => a + (b.durationMs ?? 0), 0) /
+            successfulRuns.length
+        )
+      : 0;
+
+  const activeAlerts = dbAlerts.filter((a) => a.status === "active").length;
 
   const runsByPipeline = new Map<string, typeof allRuns>();
   for (const run of allRuns) {
@@ -135,20 +132,6 @@ export default async function DashboardPage() {
     resolvedAt: a.resolvedAt?.toISOString() ?? null,
   }));
 
-  const success7d = runs7d.filter((r) => r.status === "success").length;
-  const successRate7d =
-    runs7d.length > 0
-      ? Math.round((success7d / runs7d.length) * 1000) / 10
-      : 100;
-
-  const avgLatencyMs =
-    finishedRuns.length > 0
-      ? Math.round(
-          finishedRuns.reduce((a, b) => a + (b.durationMs ?? 0), 0) /
-            finishedRuns.length
-        )
-      : 0;
-
   const stats = {
     totalPipelines: dbPipelines.length,
     activePipelines: dbPipelines.filter((p) => p.status === "active").length,
@@ -158,32 +141,32 @@ export default async function DashboardPage() {
     activeAlerts,
   };
 
+  const latencyRuns = runs7d.filter(
+    (r) => r.startedAt >= since24h && r.durationMs != null
+  );
   const latencyTrend = Array.from({ length: 24 }, (_, i) => {
     const hour = new Date(now);
     hour.setMinutes(0, 0, 0);
     hour.setHours(hour.getHours() - (23 - i));
     const nextHour = new Date(hour);
     nextHour.setHours(nextHour.getHours() + 1);
-    const runs = latencyRuns.filter(
+    const hourRuns = latencyRuns.filter(
       (r) => r.startedAt >= hour && r.startedAt < nextHour
     );
     const avg =
-      runs.length > 0
+      hourRuns.length > 0
         ? Math.round(
-            runs.reduce((a, b) => a + (b.durationMs ?? 0), 0) / runs.length
+            hourRuns.reduce((a, b) => a + (b.durationMs ?? 0), 0) /
+              hourRuns.length
           )
-        : null;
-    const sorted = runs
-      .map((r) => r.durationMs ?? 0)
-      .sort((a, b) => a - b);
+        : 0;
+    const sorted = hourRuns.map((r) => r.durationMs ?? 0).sort((a, b) => a - b);
     const p95 =
-      sorted.length > 0
-        ? sorted[Math.floor(sorted.length * 0.95)]
-        : null;
+      sorted.length > 0 ? sorted[Math.floor(sorted.length * 0.95)] : 0;
     return {
       hour: `${String(hour.getHours()).padStart(2, "0")}:00`,
-      latencyMs: avg ?? 0,
-      p95Ms: p95 ?? 0,
+      latencyMs: avg,
+      p95Ms: p95,
     };
   });
 
@@ -192,7 +175,7 @@ export default async function DashboardPage() {
     day.setHours(0, 0, 0, 0);
     const nextDay = new Date(day);
     nextDay.setDate(nextDay.getDate() + 1);
-    const dayRuns = volumeRuns.filter(
+    const dayRuns = runs7d.filter(
       (r) => r.startedAt >= day && r.startedAt < nextDay
     );
     return {

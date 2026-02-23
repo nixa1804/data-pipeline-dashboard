@@ -10,10 +10,6 @@ body {
   color: var(--foreground);
 }
 
-* {
-  box-sizing: border-box;
-}
-
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

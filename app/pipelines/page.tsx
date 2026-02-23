@@ -27,19 +27,17 @@ export default async function PipelinesPage({
 }) {
   const { status } = await searchParams;
 
-  const [dbPipelines, totalCount] = await Promise.all([
+  const [dbPipelines, totalCount, allRuns] = await Promise.all([
     prisma.pipeline.findMany({
       where: status ? { status } : undefined,
       include: { runs: { orderBy: { startedAt: "desc" }, take: 1 } },
       orderBy: { createdAt: "asc" },
     }),
     prisma.pipeline.count(),
+    prisma.pipelineRun.findMany({
+      select: { pipelineId: true, status: true, durationMs: true },
+    }),
   ]);
-
-  const allRuns = await prisma.pipelineRun.findMany({
-    where: { pipelineId: { in: dbPipelines.map((p) => p.id) } },
-    select: { pipelineId: true, status: true, durationMs: true },
-  });
 
   const runsByPipeline = new Map<string, typeof allRuns>();
   for (const run of allRuns) {

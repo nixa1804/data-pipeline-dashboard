@@ -17,20 +17,16 @@ export default async function MetricsPage() {
   const since24h = subHours(now, 24);
   const since7d = subDays(now, 7);
 
-  const [latencyRuns, volumeRuns, totalRuns, failedRuns] = await Promise.all([
-    prisma.pipelineRun.findMany({
-      where: { startedAt: { gte: since24h }, durationMs: { not: null } },
-      select: { startedAt: true, durationMs: true },
-    }),
-    prisma.pipelineRun.findMany({
-      where: { startedAt: { gte: since7d } },
-      select: { startedAt: true, status: true },
-    }),
-    prisma.pipelineRun.count({ where: { startedAt: { gte: since7d } } }),
-    prisma.pipelineRun.count({
-      where: { startedAt: { gte: since7d }, status: "failed" },
-    }),
-  ]);
+  const runs7d = await prisma.pipelineRun.findMany({
+    where: { startedAt: { gte: since7d } },
+    select: { startedAt: true, status: true, durationMs: true },
+  });
+
+  const latencyRuns = runs7d.filter(
+    (r) => r.startedAt >= since24h && r.durationMs != null
+  );
+  const totalRuns = runs7d.length;
+  const failedRuns = runs7d.filter((r) => r.status === "failed").length;
 
   const latencyTrend = Array.from({ length: 24 }, (_, i) => {
     const hour = new Date(now);
@@ -61,7 +57,7 @@ export default async function MetricsPage() {
     day.setHours(0, 0, 0, 0);
     const nextDay = new Date(day);
     nextDay.setDate(nextDay.getDate() + 1);
-    const dayRuns = volumeRuns.filter(
+    const dayRuns = runs7d.filter(
       (r) => r.startedAt >= day && r.startedAt < nextDay
     );
     return {

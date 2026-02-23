@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SidebarProvider } from "@/components/layout/SidebarContext";
 import Sidebar from "@/components/layout/Sidebar";
 import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -39,12 +36,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0d1117] text-zinc-100 flex`}
+        className={`${geistSans.variable} antialiased bg-[#0d1117] text-zinc-100 flex`}
       >
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-h-screen min-w-0">
-          {children}
-        </div>
+        <SidebarProvider>
+          <Sidebar />
+          <div className="flex-1 flex flex-col min-h-screen min-w-0">
+            {children}
+          </div>
+        </SidebarProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -1,9 +1,10 @@
 "use client";
 
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Menu } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import { useSidebar } from "./SidebarContext";
 
 interface HeaderProps {
   title: string;
@@ -14,6 +15,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
   const router = useRouter();
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
   const [spinning, setSpinning] = useState(false);
+  const { open } = useSidebar();
 
   const refresh = useCallback(() => {
     setSpinning(true);
@@ -34,13 +36,22 @@ export default function Header({ title, subtitle }: HeaderProps) {
   }, [refresh]);
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#0d1117]/80 backdrop-blur-sm sticky top-0 z-10">
-      <div>
-        <h1 className="text-lg font-semibold text-white">{title}</h1>
-        {subtitle && <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>}
+    <header className="flex items-center justify-between px-4 py-4 border-b border-white/5 bg-[#0d1117]/80 backdrop-blur-sm sticky top-0 z-10">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={open}
+          className="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-lg font-semibold text-white">{title}</h1>
+          {subtitle && <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>}
+        </div>
       </div>
-      <div className="flex items-center gap-4">
-        <span className="text-xs text-zinc-500">
+      <div className="flex items-center gap-3">
+        <span className="hidden sm:block text-xs text-zinc-500">
           Refreshed {formatDistanceToNow(lastRefreshed, { addSuffix: true })}
         </span>
         <button
