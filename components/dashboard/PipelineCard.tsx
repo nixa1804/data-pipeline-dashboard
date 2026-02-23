@@ -42,15 +42,23 @@ export default function PipelineCard({ pipeline }: PipelineCardProps) {
       </div>
 
       {/* Source → Destination */}
-      <div className="flex items-center gap-2 text-xs text-zinc-500">
-        <span className="bg-white/5 rounded px-2 py-0.5 font-mono truncate max-w-[45%]">
-          {pipeline.source}
-        </span>
-        <ArrowRight className="w-3 h-3 shrink-0" />
-        <span className="bg-white/5 rounded px-2 py-0.5 font-mono truncate max-w-[45%]">
-          {pipeline.destination}
-        </span>
-      </div>
+      {(pipeline.source || pipeline.destination) && (
+        <div className="flex items-center gap-2 text-xs text-zinc-500">
+          {pipeline.source && (
+            <span className="bg-white/5 rounded px-2 py-0.5 font-mono truncate max-w-[45%]">
+              {pipeline.source}
+            </span>
+          )}
+          {pipeline.source && pipeline.destination && (
+            <ArrowRight className="w-3 h-3 shrink-0" />
+          )}
+          {pipeline.destination && (
+            <span className="bg-white/5 rounded px-2 py-0.5 font-mono truncate max-w-[45%]">
+              {pipeline.destination}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Last run stats */}
       {run && (
@@ -62,7 +70,7 @@ export default function PipelineCard({ pipeline }: PipelineCardProps) {
           <span className="flex items-center gap-1">
             <Rows3 className="w-3 h-3" />
             {run.rowsProcessed != null
-              ? run.rowsProcessed.toLocaleString() + " rows"
+              ? run.rowsProcessed.toLocaleString() + " " + (pipeline.itemUnit ?? "items")
               : "—"}
           </span>
           <span className="ml-auto">

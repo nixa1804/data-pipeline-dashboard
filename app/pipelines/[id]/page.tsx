@@ -85,7 +85,11 @@ export default async function PipelineDetailPage({
     <>
       <Header
         title={pipeline.name}
-        subtitle={`${pipeline.source} → ${pipeline.destination}`}
+        subtitle={
+          pipeline.source && pipeline.destination
+            ? `${pipeline.source} → ${pipeline.destination}`
+            : pipeline.source ?? pipeline.destination ?? undefined
+        }
       />
       <main className="flex-1 px-6 py-6 space-y-6">
         <Link
@@ -111,10 +115,12 @@ export default async function PipelineDetailPage({
             <p className="text-sm text-zinc-400 flex-1">{pipeline.description}</p>
           )}
           <div className="flex items-center gap-5 text-xs text-zinc-500 ml-auto">
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" />
-              {pipeline.schedule}
-            </span>
+            {pipeline.schedule && (
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" />
+                {pipeline.schedule}
+              </span>
+            )}
             <span className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               Created {formatDistanceToNow(pipeline.createdAt, { addSuffix: true })}
@@ -122,11 +128,19 @@ export default async function PipelineDetailPage({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#161b22] border border-white/5 rounded-xl px-5 py-3">
-          <span className="bg-white/5 rounded px-2 py-1 font-mono">{pipeline.source}</span>
-          <ArrowRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
-          <span className="bg-white/5 rounded px-2 py-1 font-mono">{pipeline.destination}</span>
-        </div>
+        {(pipeline.source || pipeline.destination) && (
+          <div className="flex items-center gap-2 text-xs text-zinc-400 bg-[#161b22] border border-white/5 rounded-xl px-5 py-3">
+            {pipeline.source && (
+              <span className="bg-white/5 rounded px-2 py-1 font-mono">{pipeline.source}</span>
+            )}
+            {pipeline.source && pipeline.destination && (
+              <ArrowRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+            )}
+            {pipeline.destination && (
+              <span className="bg-white/5 rounded px-2 py-1 font-mono">{pipeline.destination}</span>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
@@ -181,7 +195,7 @@ export default async function PipelineDetailPage({
                   <th className="px-5 py-3 text-left font-medium">Started</th>
                   <th className="px-5 py-3 text-left font-medium">Finished</th>
                   <th className="px-5 py-3 text-right font-medium">Duration</th>
-                  <th className="px-5 py-3 text-right font-medium">Rows</th>
+                  <th className="px-5 py-3 text-right font-medium capitalize">{pipeline.itemUnit ?? "Items"}</th>
                   <th className="px-5 py-3 text-left font-medium">Error</th>
                 </tr>
               </thead>

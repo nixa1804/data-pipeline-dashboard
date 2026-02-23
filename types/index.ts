@@ -8,9 +8,10 @@ export interface Pipeline {
   name: string;
   description: string | null;
   status: PipelineStatus;
-  schedule: string;
-  source: string;
-  destination: string;
+  schedule: string | null;
+  source: string | null;
+  destination: string | null;
+  itemUnit: string | null;
   createdAt: string;
   updatedAt: string;
   lastRun?: PipelineRun | null;

@@ -12,9 +12,10 @@ model Pipeline {
   name        String
   description String?
   status      String   // active, inactive, deprecated
-  schedule    String   // cron expression e.g. "0 */6 * * *"
-  source      String
-  destination String
+  schedule    String?
+  source      String?
+  destination String?
+  itemUnit    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

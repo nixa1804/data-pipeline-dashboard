@@ -101,6 +101,7 @@ export default async function DashboardPage() {
       schedule: p.schedule,
       source: p.source,
       destination: p.destination,
+      itemUnit: p.itemUnit,
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
       successRate: successRate ?? undefined,

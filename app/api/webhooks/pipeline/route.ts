@@ -8,22 +8,48 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { runId, status, durationMs, rowsProcessed, errorMessage } = body;
+  const { runId, jobId, status, startedAt, durationMs, rowsProcessed, itemsProcessed, errorMessage } = body;
 
-  if (!runId || !status) {
-    return NextResponse.json({ error: "Missing runId or status" }, { status: 400 });
+  if (!status) {
+    return NextResponse.json({ error: "Missing required field: status" }, { status: 400 });
   }
 
-  await prisma.pipelineRun.update({
-    where: { id: runId },
-    data: {
-      status,
-      finishedAt: new Date(),
-      durationMs: durationMs ?? null,
-      rowsProcessed: rowsProcessed ?? null,
-      errorMessage: errorMessage ?? null,
-    },
-  });
+  const items = itemsProcessed ?? rowsProcessed ?? null;
+  const finishedAt = new Date();
 
-  return NextResponse.json({ ok: true });
+  if (runId) {
+    await prisma.pipelineRun.update({
+      where: { id: runId },
+      data: {
+        status,
+        finishedAt,
+        durationMs: durationMs ?? null,
+        rowsProcessed: items,
+        errorMessage: errorMessage ?? null,
+      },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (jobId) {
+    const job = await prisma.pipeline.findUnique({ where: { id: jobId } });
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+    const start = startedAt ? new Date(startedAt) : new Date(finishedAt.getTime() - (durationMs ?? 0));
+    const run = await prisma.pipelineRun.create({
+      data: {
+        pipelineId: jobId,
+        status,
+        startedAt: start,
+        finishedAt,
+        durationMs: durationMs ?? (finishedAt.getTime() - start.getTime()),
+        rowsProcessed: items,
+        errorMessage: errorMessage ?? null,
+      },
+    });
+    return NextResponse.json({ ok: true, runId: run.id });
+  }
+
+  return NextResponse.json({ error: "Provide either runId or jobId" }, { status: 400 });
 }
