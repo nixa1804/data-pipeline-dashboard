@@ -9,6 +9,7 @@ Real-time ETL pipeline observability dashboard. Monitor pipeline health, run his
 - **Alerts** — alert log with severity levels (critical, warning, info) and status tracking
 - **Metrics** — historical charts for latency and run volume with key stats
 - **Settings** — configurable refresh interval and alert thresholds, persisted in localStorage
+- **Retry** — retry failed pipelines directly from the dashboard or detail page; polling detects completion in real time
 - Responsive layout with mobile sidebar drawer
 - Auto-refresh with configurable interval
 
@@ -56,9 +57,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment Variables
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `PIPELINE_API_URL` | No | Base URL of external pipeline execution API. If not set, retry runs in simulation mode |
+| `PIPELINE_API_SECRET` | No | Bearer token for `PIPELINE_API_URL` authentication |
+| `WEBHOOK_SECRET` | No | Secret for validating incoming webhook calls to `/api/webhooks/pipeline` |
 
 ## Deployment (Vercel)
 
@@ -76,8 +80,25 @@ DATABASE_URL="your-production-url" npm run db:seed
 |---|---|---|
 | `/api/pipelines` | GET | List pipelines (supports `?status=` filter) |
 | `/api/alerts` | GET | List alerts (supports `?status=` filter) |
+| `/api/runs/[id]` | GET | Get run status by ID — used for retry polling |
+| `/api/webhooks/pipeline` | POST | Receive pipeline completion callback from external system |
 
-Both routes are rate-limited per IP and include HTTP security headers.
+`/api/pipelines` and `/api/alerts` are rate-limited per IP. `/api/webhooks/pipeline` requires `x-webhook-secret` header if `WEBHOOK_SECRET` env var is set.
+
+### Webhook payload
+
+```json
+POST /api/webhooks/pipeline
+x-webhook-secret: <WEBHOOK_SECRET>
+
+{
+  "runId": "clx...",
+  "status": "success",
+  "durationMs": 3200,
+  "rowsProcessed": 14500,
+  "errorMessage": null
+}
+```
 
 ## Scripts
 
