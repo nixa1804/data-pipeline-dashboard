@@ -2,6 +2,8 @@
 
 Universal job observability dashboard. Integrate any application or scheduled task — monitor health, run history, latency trends, and alerts in one place.
 
+**[Live Demo]((https://data-pipeline-dashboard.vercel.app/))**
+
 ## Features
 
 - **Dashboard** — overview stats, latency trend (24h), run volume (7d), recent job cards and alerts
