@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Clock, Calendar } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Badge from "@/components/ui/Badge";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
+import RetryButton from "@/components/dashboard/RetryButton";
 import { prisma } from "@/lib/db";
 import type { RunStatus, Alert } from "@/types";
 import clsx from "clsx";
@@ -102,6 +103,9 @@ export default async function PipelineDetailPage({
               label={pipeline.status.charAt(0).toUpperCase() + pipeline.status.slice(1)}
               dot
             />
+            {lastRun?.status === "failed" && (
+              <RetryButton pipelineId={pipeline.id} />
+            )}
           </div>
           {pipeline.description && (
             <p className="text-sm text-zinc-400 flex-1">{pipeline.description}</p>

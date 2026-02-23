@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowRight, Clock, Rows3 } from "lucide-react";
 import Badge from "@/components/ui/Badge";
+import RetryButton from "@/components/dashboard/RetryButton";
 import type { Pipeline, RunStatus } from "@/types";
 
 function formatMs(ms: number) {
@@ -75,17 +76,21 @@ export default function PipelineCard({ pipeline }: PipelineCardProps) {
         <div className="flex items-center gap-3">
           <span className="text-xs text-zinc-500">
             Success rate:{" "}
-            <span
-              className={
-                (pipeline.successRate ?? 100) < 90
-                  ? "text-red-400"
-                  : (pipeline.successRate ?? 100) < 95
-                  ? "text-amber-400"
-                  : "text-emerald-400"
-              }
-            >
-              {pipeline.successRate?.toFixed(1)}%
-            </span>
+            {pipeline.successRate != null ? (
+              <span
+                className={
+                  pipeline.successRate < 90
+                    ? "text-red-400"
+                    : pipeline.successRate < 95
+                    ? "text-amber-400"
+                    : "text-emerald-400"
+                }
+              >
+                {pipeline.successRate.toFixed(1)}%
+              </span>
+            ) : (
+              <span className="text-zinc-600">—</span>
+            )}
           </span>
         </div>
         <Link
@@ -99,8 +104,9 @@ export default function PipelineCard({ pipeline }: PipelineCardProps) {
 
       {/* Error snippet */}
       {run?.errorMessage && (
-        <div className="bg-red-500/5 border border-red-500/15 rounded-lg px-3 py-2">
+        <div className="bg-red-500/5 border border-red-500/15 rounded-lg px-3 py-2 flex items-start justify-between gap-3">
           <p className="text-xs text-red-400 font-mono line-clamp-2">{run.errorMessage}</p>
+          <RetryButton pipelineId={pipeline.id} className="shrink-0 mt-0.5" />
         </div>
       )}
     </div>
