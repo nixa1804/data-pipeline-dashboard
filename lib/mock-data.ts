@@ -16,6 +16,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "*/15 * * * *",
     source: "Kafka: sales-events",
     destination: "BigQuery: analytics.sales",
+    itemUnit: null,
     createdAt: iso(subDays(now, 90)),
     updatedAt: iso(subHours(now, 1)),
     lastRun: {
@@ -40,6 +41,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "0 */1 * * *",
     source: "Postgres: users",
     destination: "Elasticsearch: profiles",
+    itemUnit: null,
     createdAt: iso(subDays(now, 60)),
     updatedAt: iso(subHours(now, 3)),
     lastRun: {
@@ -64,6 +66,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "0 2 * * *",
     source: "MySQL: inventory",
     destination: "S3: datalake/inventory",
+    itemUnit: null,
     createdAt: iso(subDays(now, 45)),
     updatedAt: iso(subHours(now, 22)),
     lastRun: {
@@ -88,6 +91,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "0 6 * * *",
     source: "Google Ads API + S3",
     destination: "Redshift: marketing",
+    itemUnit: null,
     createdAt: iso(subDays(now, 30)),
     updatedAt: iso(subHours(now, 18)),
     lastRun: {
@@ -112,6 +116,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "0 3 * * *",
     source: "Redshift: analytics",
     destination: "Redis: feature-store",
+    itemUnit: null,
     createdAt: iso(subDays(now, 20)),
     updatedAt: iso(subHours(now, 21)),
     lastRun: {
@@ -136,6 +141,7 @@ export const mockPipelines: Pipeline[] = [
     schedule: "0 23 * * *",
     source: "Postgres: finance",
     destination: "SFTP: accounting-system",
+    itemUnit: null,
     createdAt: iso(subDays(now, 180)),
     updatedAt: iso(subDays(now, 5)),
     lastRun: {
