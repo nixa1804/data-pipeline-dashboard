@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import Sidebar from "@/components/layout/Sidebar";
 import "./globals.css";
@@ -45,6 +46,7 @@ export default function RootLayout({
           </div>
         </SidebarProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
