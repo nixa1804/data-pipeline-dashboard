@@ -11,14 +11,12 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("Seeding database...");
 
-  // Clear existing data
   await prisma.alert.deleteMany();
   await prisma.pipelineRun.deleteMany();
   await prisma.pipeline.deleteMany();
 
   const now = new Date();
 
-  // Pipelines
   const pip1 = await prisma.pipeline.create({
     data: {
       name: "Sales Events → Warehouse",
@@ -85,7 +83,6 @@ async function main() {
     },
   });
 
-  // Runs for pip1 (Sales Events)
   for (let i = 0; i < 12; i++) {
     await prisma.pipelineRun.create({
       data: {
@@ -100,7 +97,6 @@ async function main() {
     });
   }
 
-  // Runs for pip2 (User Profiles — recent failure)
   await prisma.pipelineRun.create({
     data: {
       pipelineId: pip2.id,
@@ -127,7 +123,6 @@ async function main() {
     });
   }
 
-  // Run for pip3 (Inventory Snapshot)
   await prisma.pipelineRun.create({
     data: {
       pipelineId: pip3.id,
@@ -140,7 +135,6 @@ async function main() {
     },
   });
 
-  // Run for pip4 (Marketing Attribution — currently running)
   await prisma.pipelineRun.create({
     data: {
       pipelineId: pip4.id,
@@ -153,7 +147,6 @@ async function main() {
     },
   });
 
-  // Run for pip5 (Customer Churn — failed)
   await prisma.pipelineRun.create({
     data: {
       pipelineId: pip5.id,
@@ -166,7 +159,6 @@ async function main() {
     },
   });
 
-  // Run for pip6 (Finance Ledger — skipped)
   await prisma.pipelineRun.create({
     data: {
       pipelineId: pip6.id,
@@ -179,7 +171,148 @@ async function main() {
     },
   });
 
-  // Alerts
+  const pip7 = await prisma.pipeline.create({
+    data: {
+      name: "Clickstream → Data Lake",
+      description: "Streams raw clickstream events from Kinesis into S3 Parquet partitions",
+      status: "active",
+      schedule: "*/5 * * * *",
+      source: "Kinesis: clickstream",
+      destination: "S3: datalake/clickstream",
+      itemUnit: "events",
+    },
+  });
+
+  const pip8 = await prisma.pipeline.create({
+    data: {
+      name: "Order Fulfillment Sync",
+      description: "Replicates order fulfillment status from ERP to customer-facing API DB",
+      status: "active",
+      schedule: "*/10 * * * *",
+      source: "SAP ERP",
+      destination: "Postgres: orders",
+      itemUnit: "orders",
+    },
+  });
+
+  const pip9 = await prisma.pipeline.create({
+    data: {
+      name: "Payment Events Audit",
+      description: "Archives all payment events to immutable audit log in BigQuery",
+      status: "active",
+      schedule: "*/1 * * * *",
+      source: "Stripe API",
+      destination: "BigQuery: audit.payments",
+      itemUnit: "transactions",
+    },
+  });
+
+  const pip10 = await prisma.pipeline.create({
+    data: {
+      name: "Email Campaign Metrics",
+      description: "Pulls open/click rates from Mailchimp and loads to reporting DB",
+      status: "inactive",
+      schedule: "0 8 * * *",
+      source: "Mailchimp API",
+      destination: "Postgres: marketing_reports",
+      itemUnit: "campaigns",
+    },
+  });
+
+  const pip11 = await prisma.pipeline.create({
+    data: {
+      name: "Product Catalog CDN Sync",
+      description: "Pushes updated product catalog JSON to CDN edge locations",
+      status: "active",
+      schedule: "0 */4 * * *",
+      source: "Postgres: catalog",
+      destination: "CloudFront: cdn/catalog",
+      itemUnit: "products",
+    },
+  });
+
+  for (let i = 0; i < 24; i++) {
+    const failed = i === 7 || i === 15;
+    await prisma.pipelineRun.create({
+      data: {
+        pipelineId: pip7.id,
+        status: failed ? "failed" : "success",
+        startedAt: subMinutes(now, 5 * (i + 1)),
+        finishedAt: subMinutes(now, 5 * (i + 1) - 1),
+        durationMs: failed ? 800 : 400 + Math.floor(Math.random() * 600),
+        rowsProcessed: failed ? 0 : 50000 + Math.floor(Math.random() * 30000),
+        errorMessage: failed ? "Kinesis shard iterator expired — checkpoint lost" : null,
+      },
+    });
+  }
+
+  for (let i = 0; i < 18; i++) {
+    await prisma.pipelineRun.create({
+      data: {
+        pipelineId: pip8.id,
+        status: i === 11 ? "failed" : "success",
+        startedAt: subMinutes(now, 10 * (i + 1)),
+        finishedAt: subMinutes(now, 10 * (i + 1) - 3),
+        durationMs: 3000 + Math.floor(Math.random() * 2000),
+        rowsProcessed: i === 11 ? 0 : 200 + Math.floor(Math.random() * 800),
+        errorMessage: i === 11 ? "SAP RFC call failed: connection pool exhausted" : null,
+      },
+    });
+  }
+
+  await prisma.pipelineRun.create({
+    data: {
+      pipelineId: pip9.id,
+      status: "running",
+      startedAt: subMinutes(now, 1),
+      finishedAt: null,
+      durationMs: null,
+      rowsProcessed: null,
+      errorMessage: null,
+    },
+  });
+
+  for (let i = 0; i < 30; i++) {
+    await prisma.pipelineRun.create({
+      data: {
+        pipelineId: pip9.id,
+        status: "success",
+        startedAt: subMinutes(now, i + 2),
+        finishedAt: subMinutes(now, i + 1),
+        durationMs: 500 + Math.floor(Math.random() * 400),
+        rowsProcessed: 10 + Math.floor(Math.random() * 100),
+        errorMessage: null,
+      },
+    });
+  }
+
+  await prisma.pipelineRun.create({
+    data: {
+      pipelineId: pip10.id,
+      status: "success",
+      startedAt: subDays(now, 3),
+      finishedAt: subDays(now, 3),
+      durationMs: 12400,
+      rowsProcessed: 47,
+      errorMessage: null,
+    },
+  });
+
+  for (let i = 0; i < 6; i++) {
+    const failed = i === 2;
+    await prisma.pipelineRun.create({
+      data: {
+        pipelineId: pip11.id,
+        status: failed ? "failed" : "success",
+        startedAt: subHours(now, 4 * (i + 1)),
+        finishedAt: subHours(now, 4 * (i + 1) - 0.1),
+        durationMs: failed ? 600 : 280 + Math.floor(Math.random() * 300),
+        rowsProcessed: failed ? 0 : 3000 + Math.floor(Math.random() * 1500),
+        errorMessage: failed ? "CloudFront invalidation quota exceeded (1000/day)" : null,
+      },
+    });
+  }
+
   await prisma.alert.createMany({
     data: [
       {
@@ -217,6 +350,28 @@ async function main() {
         status: "resolved",
         triggeredAt: subDays(now, 1),
         resolvedAt: subHours(now, 20),
+      },
+      {
+        pipelineId: pip7.id,
+        severity: "critical",
+        message: "Kinesis shard iterator expired — 2 failed runs in last 15 min",
+        status: "active",
+        triggeredAt: subMinutes(now, 15),
+      },
+      {
+        pipelineId: pip8.id,
+        severity: "warning",
+        message: "SAP RFC connection pool exhausted — 1 run failed",
+        status: "acknowledged",
+        triggeredAt: subMinutes(now, 110),
+      },
+      {
+        pipelineId: pip11.id,
+        severity: "warning",
+        message: "CloudFront invalidation quota hit — catalog sync skipped",
+        status: "resolved",
+        triggeredAt: subHours(now, 10),
+        resolvedAt: subHours(now, 6),
       },
     ],
   });
