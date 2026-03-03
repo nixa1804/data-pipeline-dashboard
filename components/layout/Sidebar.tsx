@@ -24,18 +24,16 @@ const nav = [
 
 export default function Sidebar() {
   const pathnameFromHook = usePathname();
-  const [pathname, setPathname] = useState(pathnameFromHook || "/");
+  const [isMounted, setIsMounted] = useState(false);
   const { isOpen, close } = useSidebar();
 
   useEffect(() => {
-    setPathname(window.location.pathname || "/");
+    setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (pathnameFromHook) {
-      setPathname(pathnameFromHook);
-    }
-  }, [pathnameFromHook]);
+  const pathname = isMounted
+    ? (pathnameFromHook || window.location.pathname || "/")
+    : (pathnameFromHook || "/");
 
   return (
     <>

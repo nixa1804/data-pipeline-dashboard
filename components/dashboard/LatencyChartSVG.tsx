@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface DataPoint {
   hour: string;
@@ -25,6 +25,7 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
   const cH = H - pt - pb;
 
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const prevHoveredIdx = useRef<number | null>(null);
 
   const maxVal = Math.max(...data.map((d) => Math.max(d.latencyMs, d.p95Ms)), 100);
 
@@ -61,7 +62,10 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
       const dist = Math.abs(xAt(i) - svgX);
       if (dist < minDist) { minDist = dist; closest = i; }
     });
-    setHoveredIdx(closest);
+    if (prevHoveredIdx.current !== closest) {
+      prevHoveredIdx.current = closest;
+      setHoveredIdx(closest);
+    }
   };
 
   const tipW = 130;
@@ -157,7 +161,7 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
           const tipX = Math.min(Math.max(cx - tipW / 2, pl), W - pr - tipW);
           const tipY = pt + 4;
           return (
-            <g>
+            <g style={{ pointerEvents: "none" }}>
               <line x1={cx} y1={pt} x2={cx} y2={pt + cH} stroke="#ffffff25" strokeWidth="1" />
               <circle cx={cx} cy={yAt(d.latencyMs)} r="3.5" fill="#6366f1" />
               <circle cx={cx} cy={yAt(d.p95Ms)} r="3.5" fill="#f59e0b" />

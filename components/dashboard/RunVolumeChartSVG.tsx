@@ -51,20 +51,6 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
         </p>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
-        <defs>
-          {data.map((d, i) => {
-            const x = pl + i * barSlot + barPad / 2;
-            const totalH = ((d.success + d.failed + d.skipped) / maxVal) * cH;
-            if (totalH <= 0) return null;
-            const topY = bottomY - totalH;
-            return (
-              <clipPath key={i} id={`barClip-${i}`}>
-                <path d={`M ${x + r},${topY} H ${x + bW - r} Q ${x + bW},${topY} ${x + bW},${topY + r} V ${bottomY} H ${x} V ${topY + r} Q ${x},${topY} ${x + r},${topY} Z`} />
-              </clipPath>
-            );
-          })}
-        </defs>
-
         {yTicks.map(({ y }, idx) => (
           <line
             key={idx}
@@ -77,17 +63,54 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
           />
         ))}
 
+        {hoveredIdx !== null && (
+          <rect
+            x={pl + hoveredIdx * barSlot}
+            y={pt}
+            width={barSlot}
+            height={cH}
+            fill="white"
+            fillOpacity="0.04"
+            style={{ pointerEvents: "none" }}
+          />
+        )}
+
         {data.map((d, i) => {
           const x = pl + i * barSlot + barPad / 2;
           const successH = (d.success / maxVal) * cH;
           const failedH = (d.failed / maxVal) * cH;
           const skippedH = (d.skipped / maxVal) * cH;
           const totalH = successH + failedH + skippedH;
+          if (totalH <= 0) return null;
+
+          const segs: { y: number; h: number; color: string }[] = [];
+          let accY = bottomY;
+          for (const item of [
+            { h: successH, color: "#10b981" },
+            { h: failedH, color: "#ef4444" },
+            { h: skippedH, color: "#3f3f46" },
+          ]) {
+            if (item.h > 0) {
+              segs.push({ y: accY - item.h, h: item.h, color: item.color });
+              accY -= item.h;
+            }
+          }
+
           return (
-            <g key={i} clipPath={totalH > 0 ? `url(#barClip-${i})` : undefined}>
-              <rect x={x} y={bottomY - successH} width={bW} height={successH} fill="#10b981" />
-              <rect x={x} y={bottomY - successH - failedH} width={bW} height={failedH} fill="#ef4444" />
-              <rect x={x} y={bottomY - successH - failedH - skippedH} width={bW} height={skippedH} fill="#3f3f46" />
+            <g key={i}>
+              {segs.map((seg, si) => {
+                const isTop = si === segs.length - 1;
+                if (isTop) {
+                  const coverH = Math.min(r, seg.h);
+                  return (
+                    <g key={si}>
+                      <rect x={x} y={seg.y} width={bW} height={seg.h} rx={r} fill={seg.color} />
+                      <rect x={x} y={seg.y + seg.h - coverH} width={bW} height={coverH} fill={seg.color} />
+                    </g>
+                  );
+                }
+                return <rect key={si} x={x} y={seg.y} width={bW} height={seg.h + 1} fill={seg.color} />;
+              })}
             </g>
           );
         })}
@@ -140,7 +163,7 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
           const tipX = Math.min(Math.max(cx - tipW / 2, pl), W - pr - tipW);
           const tipY = pt + 4;
           return (
-            <g>
+            <g style={{ pointerEvents: "none" }}>
               <rect x={tipX} y={tipY} width={tipW} height={tipH} fill="#1a2030" rx="5" stroke="#ffffff18" strokeWidth="1" />
               <text x={tipX + 10} y={tipY + 16} fill="#a1a1aa" fontSize="10" fontWeight="600">{d.date.split(",")[0]}</text>
               <rect x={tipX + 10} y={tipY + 25} width={7} height={7} fill="#10b981" rx="1" />
