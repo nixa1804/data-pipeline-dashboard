@@ -30,6 +30,7 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
   const barPad = barSlot * 0.3;
   const bW = barSlot - barPad;
   const bottomY = pt + cH;
+  const r = 3;
 
   const yAt = (v: number) => pt + cH - (v / maxVal) * cH;
 
@@ -50,6 +51,20 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
         </p>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
+        <defs>
+          {data.map((d, i) => {
+            const x = pl + i * barSlot + barPad / 2;
+            const totalH = ((d.success + d.failed + d.skipped) / maxVal) * cH;
+            if (totalH <= 0) return null;
+            const topY = bottomY - totalH;
+            return (
+              <clipPath key={i} id={`barClip-${i}`}>
+                <path d={`M ${x + r},${topY} H ${x + bW - r} Q ${x + bW},${topY} ${x + bW},${topY + r} V ${bottomY} H ${x} V ${topY + r} Q ${x},${topY} ${x + r},${topY} Z`} />
+              </clipPath>
+            );
+          })}
+        </defs>
+
         {yTicks.map(({ y }, idx) => (
           <line
             key={idx}
@@ -67,31 +82,12 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
           const successH = (d.success / maxVal) * cH;
           const failedH = (d.failed / maxVal) * cH;
           const skippedH = (d.skipped / maxVal) * cH;
+          const totalH = successH + failedH + skippedH;
           return (
-            <g key={i}>
-              <rect
-                x={x}
-                y={bottomY - successH}
-                width={bW}
-                height={successH}
-                fill="#10b981"
-              />
-              <rect
-                x={x}
-                y={bottomY - successH - failedH}
-                width={bW}
-                height={failedH}
-                fill="#ef4444"
-              />
-              <rect
-                x={x}
-                y={bottomY - successH - failedH - skippedH}
-                width={bW}
-                height={skippedH}
-                fill="#3f3f46"
-                rx="2"
-                ry="2"
-              />
+            <g key={i} clipPath={totalH > 0 ? `url(#barClip-${i})` : undefined}>
+              <rect x={x} y={bottomY - successH} width={bW} height={successH} fill="#10b981" />
+              <rect x={x} y={bottomY - successH - failedH} width={bW} height={failedH} fill="#ef4444" />
+              <rect x={x} y={bottomY - successH - failedH - skippedH} width={bW} height={skippedH} fill="#3f3f46" />
             </g>
           );
         })}
