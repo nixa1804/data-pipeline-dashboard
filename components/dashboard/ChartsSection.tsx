@@ -1,4 +1,5 @@
-import ChartsClient from "@/components/dashboard/ChartsClient";
+import LatencyChartSVG from "@/components/dashboard/LatencyChartSVG";
+import RunVolumeChartSVG from "@/components/dashboard/RunVolumeChartSVG";
 import { prisma } from "@/lib/db";
 import { subDays, subHours } from "date-fns";
 
@@ -61,5 +62,10 @@ export default async function ChartsSection() {
     };
   });
 
-  return <ChartsClient latencyTrend={latencyTrend} runVolume={runVolume} />;
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+      <LatencyChartSVG data={latencyTrend} />
+      <RunVolumeChartSVG data={runVolume} />
+    </div>
+  );
 }

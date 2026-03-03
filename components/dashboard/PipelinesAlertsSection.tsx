@@ -11,6 +11,8 @@ export default async function PipelinesAlertsSection() {
     }),
     prisma.pipelineRun.findMany({
       select: { pipelineId: true, status: true, durationMs: true },
+      orderBy: { startedAt: "desc" },
+      take: 500,
     }),
     prisma.alert.findMany({
       include: { pipeline: { select: { name: true } } },

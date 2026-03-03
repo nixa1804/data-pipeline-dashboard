@@ -5,8 +5,7 @@ export const metadata: Metadata = {
   title: "Metrics",
   description: "Historical pipeline performance — latency trends and run volume over time.",
 };
-import LatencyChart from "@/components/dashboard/LatencyChart";
-import RunVolumeChart from "@/components/dashboard/RunVolumeChart";
+import MetricsChartsClient from "@/components/dashboard/MetricsChartsClient";
 import { prisma } from "@/lib/db";
 import { subDays, subHours } from "date-fns";
 
@@ -114,8 +113,7 @@ export default async function MetricsPage() {
           ))}
         </div>
 
-        <LatencyChart data={latencyTrend} />
-        <RunVolumeChart data={runVolume} />
+        <MetricsChartsClient latencyTrend={latencyTrend} runVolume={runVolume} />
       </main>
     </>
   );
