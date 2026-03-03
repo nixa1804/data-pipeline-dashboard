@@ -29,6 +29,12 @@ export default function Sidebar() {
 
   useEffect(() => {
     setPathname(window.location.pathname || "/");
+  }, []);
+
+  useEffect(() => {
+    if (pathnameFromHook) {
+      setPathname(pathnameFromHook);
+    }
   }, [pathnameFromHook]);
 
   return (
