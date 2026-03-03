@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 interface DataPoint {
   date: string;
   success: number;
@@ -14,6 +18,8 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
   const pb = 30;
   const cW = W - pl - pr;
   const cH = H - pt - pb;
+
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const maxVal = Math.max(
     ...data.map((d) => d.success + d.failed + d.skipped),
@@ -32,6 +38,9 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
     y: yAt(maxVal * f),
   }));
 
+  const tipW = 118;
+  const tipH = 72;
+
   return (
     <div className="bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
@@ -40,7 +49,7 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
           Successful, failed and skipped runs per day
         </p>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-hidden="true">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full">
         {yTicks.map(({ y }, idx) => (
           <line
             key={idx}
@@ -112,6 +121,41 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
             {d.date.split(",")[0]}
           </text>
         ))}
+
+        {/* transparent hit areas per bar slot */}
+        {data.map((_, i) => (
+          <rect
+            key={`hit-${i}`}
+            x={pl + i * barSlot}
+            y={pt}
+            width={barSlot}
+            height={cH}
+            fill="transparent"
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+            style={{ cursor: "default" }}
+          />
+        ))}
+
+        {/* tooltip */}
+        {hoveredIdx !== null && (() => {
+          const d = data[hoveredIdx];
+          const cx = pl + hoveredIdx * barSlot + barSlot / 2;
+          const tipX = Math.min(Math.max(cx - tipW / 2, pl), W - pr - tipW);
+          const tipY = pt + 4;
+          return (
+            <g>
+              <rect x={tipX} y={tipY} width={tipW} height={tipH} fill="#1a2030" rx="5" stroke="#ffffff18" strokeWidth="1" />
+              <text x={tipX + 10} y={tipY + 16} fill="#a1a1aa" fontSize="10" fontWeight="600">{d.date.split(",")[0]}</text>
+              <rect x={tipX + 10} y={tipY + 25} width={7} height={7} fill="#10b981" rx="1" />
+              <text x={tipX + 21} y={tipY + 32} fill="#e4e4e7" fontSize="10">Success: {d.success}</text>
+              <rect x={tipX + 10} y={tipY + 40} width={7} height={7} fill="#ef4444" rx="1" />
+              <text x={tipX + 21} y={tipY + 47} fill="#e4e4e7" fontSize="10">Failed: {d.failed}</text>
+              <rect x={tipX + 10} y={tipY + 55} width={7} height={7} fill="#3f3f46" rx="1" />
+              <text x={tipX + 21} y={tipY + 62} fill="#e4e4e7" fontSize="10">Skipped: {d.skipped}</text>
+            </g>
+          );
+        })()}
       </svg>
 
       <div className="flex items-center gap-4 mt-2">

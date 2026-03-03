@@ -22,7 +22,7 @@ const nav = [
 ];
 
 export default function Sidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const { isOpen, close } = useSidebar();
 
   return (

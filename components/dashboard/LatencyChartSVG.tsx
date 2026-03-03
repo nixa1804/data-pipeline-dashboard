@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 interface DataPoint {
   hour: string;
   latencyMs: number;
@@ -19,6 +23,8 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
   const pb = 28;
   const cW = W - pl - pr;
   const cH = H - pt - pb;
+
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const maxVal = Math.max(...data.map((d) => Math.max(d.latencyMs, d.p95Ms)), 100);
 
@@ -46,13 +52,33 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
 
   const xLabels = data.filter((_, i) => i % 4 === 0);
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const svgX = ((e.clientX - rect.left) / rect.width) * W;
+    let closest = 0;
+    let minDist = Infinity;
+    data.forEach((_, i) => {
+      const dist = Math.abs(xAt(i) - svgX);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    setHoveredIdx(closest);
+  };
+
+  const tipW = 130;
+  const tipH = 58;
+
   return (
     <div className="bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-white">Latency Trend — Last 24 h</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Avg and P95 pipeline execution time</p>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-hidden="true">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHoveredIdx(null)}
+      >
         <defs>
           <linearGradient id="svgGradAvg" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#6366f1" stopOpacity="0.3" />
@@ -123,6 +149,30 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
             </text>
           );
         })}
+
+        {/* hover crosshair + tooltip */}
+        {hoveredIdx !== null && (() => {
+          const d = data[hoveredIdx];
+          const cx = xAt(hoveredIdx);
+          const tipX = Math.min(Math.max(cx - tipW / 2, pl), W - pr - tipW);
+          const tipY = pt + 4;
+          return (
+            <g>
+              <line x1={cx} y1={pt} x2={cx} y2={pt + cH} stroke="#ffffff25" strokeWidth="1" />
+              <circle cx={cx} cy={yAt(d.latencyMs)} r="3.5" fill="#6366f1" />
+              <circle cx={cx} cy={yAt(d.p95Ms)} r="3.5" fill="#f59e0b" />
+              <rect x={tipX} y={tipY} width={tipW} height={tipH} fill="#1a2030" rx="5" stroke="#ffffff18" strokeWidth="1" />
+              <text x={tipX + 10} y={tipY + 16} fill="#a1a1aa" fontSize="10" fontWeight="600">{d.hour}</text>
+              <circle cx={tipX + 13} cy={tipY + 30} r="3" fill="#6366f1" />
+              <text x={tipX + 21} y={tipY + 34} fill="#e4e4e7" fontSize="10">Avg: {formatMs(d.latencyMs)}</text>
+              <circle cx={tipX + 13} cy={tipY + 47} r="3" fill="#f59e0b" />
+              <text x={tipX + 21} y={tipY + 51} fill="#e4e4e7" fontSize="10">P95: {formatMs(d.p95Ms)}</text>
+            </g>
+          );
+        })()}
+
+        {/* transparent hit area */}
+        <rect x={pl} y={pt} width={cW} height={cH} fill="transparent" />
       </svg>
 
       <div className="flex items-center gap-4 mt-2">
