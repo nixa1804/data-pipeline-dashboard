@@ -1,20 +1,6 @@
-import dynamic from "next/dynamic";
+import ChartsClient from "@/components/dashboard/ChartsClient";
 import { prisma } from "@/lib/db";
 import { subDays, subHours } from "date-fns";
-
-const LatencyChart = dynamic(() => import("@/components/dashboard/LatencyChart"), {
-  loading: () => (
-    <div className="bg-[#161b22] border border-white/5 rounded-xl p-5 h-[300px] animate-pulse" />
-  ),
-  ssr: false,
-});
-
-const RunVolumeChart = dynamic(() => import("@/components/dashboard/RunVolumeChart"), {
-  loading: () => (
-    <div className="bg-[#161b22] border border-white/5 rounded-xl p-5 h-[300px] animate-pulse" />
-  ),
-  ssr: false,
-});
 
 export default async function ChartsSection() {
   const now = new Date();
@@ -75,10 +61,5 @@ export default async function ChartsSection() {
     };
   });
 
-  return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      <LatencyChart data={latencyTrend} />
-      <RunVolumeChart data={runVolume} />
-    </div>
-  );
+  return <ChartsClient latencyTrend={latencyTrend} runVolume={runVolume} />;
 }
