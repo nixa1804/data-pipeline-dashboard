@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
+import PipelineCard from "@/components/dashboard/PipelineCard";
+import { prisma } from "@/lib/db";
+import clsx from "clsx";
+import type { Pipeline } from "@/types";
 
 export const metadata: Metadata = {
   title: "Pipelines",
   description: "View and monitor all ETL pipelines, their status, success rates and last run details.",
 };
-import PipelineCard from "@/components/dashboard/PipelineCard";
-import { prisma } from "@/lib/db";
-import clsx from "clsx";
-import type { Pipeline } from "@/types";
 
 export const revalidate = 60;
 
