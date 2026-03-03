@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import Header from "@/components/layout/Header";
+import MetricsChartsClient from "@/components/dashboard/MetricsChartsClient";
+import { prisma } from "@/lib/db";
+import { subDays, subHours } from "date-fns";
 
 export const metadata: Metadata = {
   title: "Metrics",
   description: "Historical pipeline performance — latency trends and run volume over time.",
 };
-import MetricsChartsClient from "@/components/dashboard/MetricsChartsClient";
-import { prisma } from "@/lib/db";
-import { subDays, subHours } from "date-fns";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function MetricsPage() {
   const now = new Date();

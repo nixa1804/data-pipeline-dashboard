@@ -11,7 +11,7 @@ import { prisma } from "@/lib/db";
 import clsx from "clsx";
 import type { Pipeline } from "@/types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const STATUS_TABS = [
   { label: "All", value: undefined },
@@ -36,6 +36,8 @@ export default async function PipelinesPage({
     prisma.pipeline.count(),
     prisma.pipelineRun.findMany({
       select: { pipelineId: true, status: true, durationMs: true },
+      orderBy: { startedAt: "desc" },
+      take: 500,
     }),
   ]);
 

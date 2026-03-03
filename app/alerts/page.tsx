@@ -12,7 +12,7 @@ import { prisma } from "@/lib/db";
 import clsx from "clsx";
 import type { AlertSeverity, AlertStatus } from "@/types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const STATUS_TABS: { label: string; value: AlertStatus | undefined }[] = [
   { label: "All", value: undefined },
