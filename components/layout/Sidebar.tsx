@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,8 +23,13 @@ const nav = [
 ];
 
 export default function Sidebar() {
-  const pathname = usePathname() || "/";
+  const pathnameFromHook = usePathname();
+  const [pathname, setPathname] = useState(pathnameFromHook || "/");
   const { isOpen, close } = useSidebar();
+
+  useEffect(() => {
+    setPathname(window.location.pathname || "/");
+  }, [pathnameFromHook]);
 
   return (
     <>
