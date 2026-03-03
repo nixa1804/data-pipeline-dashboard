@@ -37,6 +37,7 @@ model PipelineRun {
 
   @@index([pipelineId])
   @@index([startedAt])
+  @@index([status])
 }
 
 model Alert {
@@ -49,6 +50,7 @@ model Alert {
   triggeredAt DateTime  @default(now())
   resolvedAt  DateTime?
 
+  @@index([pipelineId])
   @@index([status])
   @@index([triggeredAt])
 }
