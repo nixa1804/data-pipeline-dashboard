@@ -28,13 +28,13 @@ function formatMs(ms: number) {
 
 export default function LatencyChart({ data }: LatencyChartProps) {
   return (
-    <div className="bg-[#161b22] border border-white/5 rounded-xl p-5">
+    <div className="metrics-latency-chart bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-white">Latency Trend — Last 24 h</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Avg and P95 pipeline execution time</p>
       </div>
       <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 0, right: 0, left: 5, bottom: 0 }}>
           <defs>
             <linearGradient id="gradAvg" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -52,9 +52,10 @@ export default function LatencyChart({ data }: LatencyChartProps) {
             tickLine={false}
             axisLine={false}
             interval={3}
+            padding={{ left: 16, right: 0 }}
           />
           <YAxis
-            tick={{ fill: "#71717a", fontSize: 10 }}
+            tick={{ fill: "#71717a", fontSize: 12 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={formatMs}

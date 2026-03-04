@@ -1,6 +1,6 @@
 import DashboardChartsClient from "@/components/dashboard/DashboardChartsClient";
 import { prisma } from "@/lib/db";
-import { subDays, subHours } from "date-fns";
+import { format, subDays, subHours } from "date-fns";
 
 export default async function ChartsSection() {
   const now = new Date();
@@ -50,11 +50,7 @@ export default async function ChartsSection() {
       (r) => r.startedAt >= day && r.startedAt < nextDay
     );
     return {
-      date: day.toLocaleDateString("en-US", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }),
+      date: format(day, "MMM d"),
       success: dayRuns.filter((r) => r.status === "success").length,
       failed: dayRuns.filter((r) => r.status === "failed").length,
       skipped: dayRuns.filter((r) => r.status === "skipped").length,

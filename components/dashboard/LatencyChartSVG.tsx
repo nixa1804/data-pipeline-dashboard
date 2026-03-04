@@ -29,8 +29,11 @@ export default function LatencyChartSVG({ data }: { data: DataPoint[] }) {
 
   const maxVal = Math.max(...data.map((d) => Math.max(d.latencyMs, d.p95Ms)), 100);
 
+  const xPad = 16;
   const xAt = (i: number) =>
-    data.length > 1 ? pl + (i / (data.length - 1)) * cW : pl + cW / 2;
+    data.length > 1
+      ? pl + xPad + (i / (data.length - 1)) * (cW - xPad)
+      : pl + xPad + (cW - xPad) / 2;
   const yAt = (v: number) => pt + cH - (v / maxVal) * cH;
 
   const avgLinePts = data.map((d, i) => `${xAt(i)},${yAt(d.latencyMs)}`).join(" ");

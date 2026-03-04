@@ -24,7 +24,7 @@ interface RunVolumeChartProps {
 
 export default function RunVolumeChart({ data }: RunVolumeChartProps) {
   return (
-    <div className="bg-[#161b22] border border-white/5 rounded-xl p-5">
+    <div className="metrics-bar-chart bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-white">Run Volume — Last 7 days</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Successful, failed and skipped runs per day</p>
@@ -38,10 +38,9 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
             tickLine={false}
             axisLine={false}
             interval={0}
-            tickFormatter={(val: string) => val.split(", ")[1] ?? val}
           />
           <YAxis
-            tick={{ fill: "#71717a", fontSize: 10 }}
+            tick={{ fill: "#71717a", fontSize: 12 }}
             tickLine={false}
             axisLine={false}
           />
