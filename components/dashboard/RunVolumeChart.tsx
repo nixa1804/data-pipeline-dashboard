@@ -29,8 +29,9 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
         <h2 className="text-sm font-semibold text-white">Run Volume — Last 7 days</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Successful, failed and skipped runs per day</p>
       </div>
+      <div style={{ WebkitTapHighlightColor: "transparent" }}>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }} style={{ outline: "none" }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
           <XAxis
             dataKey="date"
@@ -51,16 +52,17 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
               fontSize: "12px",
               color: "#e4e4e7",
             }}
-            cursor={{ fill: "rgba(255,255,255,0.03)" }}
+            cursor={{ fill: "rgba(255,255,255,0.06)" }}
           />
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}
           />
-          <Bar dataKey="success" name="Success" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} />
-          <Bar dataKey="failed" name="Failed" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} />
-          <Bar dataKey="skipped" name="Skipped" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="success" name="Success" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} activeBar={{ fill: "#34d399", fillOpacity: 1 }} />
+          <Bar dataKey="failed" name="Failed" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} activeBar={{ fill: "#f87171", fillOpacity: 1 }} />
+          <Bar dataKey="skipped" name="Skipped" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} activeBar={{ fill: "#52525b", fillOpacity: 1 }} />
         </BarChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
