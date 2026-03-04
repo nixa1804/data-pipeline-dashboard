@@ -52,7 +52,7 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
               fontSize: "12px",
               color: "#e4e4e7",
             }}
-            cursor={{ fill: "rgba(255,255,255,0.06)" }}
+            cursor={false}
           />
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}
