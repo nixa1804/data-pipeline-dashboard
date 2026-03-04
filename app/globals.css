@@ -54,4 +54,12 @@ body {
   .dashboard-run-date-label {
     font-size: 14px !important;
   }
+
+  .metrics-bar-chart .recharts-xAxis .recharts-cartesian-axis-tick-value {
+    font-size: 10px !important;
+  }
+
+  .metrics-latency-chart .recharts-xAxis .recharts-cartesian-axis-tick-value {
+    font-size: 10px !important;
+  }
 }
