@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -27,6 +28,16 @@ function formatMs(ms: number) {
 }
 
 export default function LatencyChart({ data }: LatencyChartProps) {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setCompact(mq.matches);
+    const fn = (e: MediaQueryListEvent) => setCompact(e.matches);
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
   return (
     <div className="metrics-latency-chart bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
@@ -48,10 +59,10 @@ export default function LatencyChart({ data }: LatencyChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
           <XAxis
             dataKey="hour"
-            tick={{ fill: "#71717a", fontSize: 13 }}
+            tick={{ fill: "#71717a", fontSize: compact ? 10 : 13 }}
             tickLine={false}
             axisLine={false}
-            interval={3}
+            interval={compact ? 5 : 3}
             padding={{ left: 16, right: 0 }}
           />
           <YAxis

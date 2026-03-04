@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -23,6 +24,16 @@ interface RunVolumeChartProps {
 }
 
 export default function RunVolumeChart({ data }: RunVolumeChartProps) {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setCompact(mq.matches);
+    const fn = (e: MediaQueryListEvent) => setCompact(e.matches);
+    mq.addEventListener("change", fn);
+    return () => mq.removeEventListener("change", fn);
+  }, []);
+
   return (
     <div className="metrics-bar-chart bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
@@ -34,10 +45,11 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: "#71717a", fontSize: 13 }}
+            tick={{ fill: "#71717a", fontSize: compact ? 11 : 13 }}
             tickLine={false}
             axisLine={false}
             interval={0}
+            tickFormatter={compact ? (v: string) => v.split(" ")[1] ?? v : undefined}
           />
           <YAxis
             tick={{ fill: "#71717a", fontSize: 12 }}
