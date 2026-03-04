@@ -33,9 +33,8 @@ export default function LatencyChart({ data }: LatencyChartProps) {
         <h2 className="text-sm font-semibold text-white">Latency Trend — Last 24 h</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Avg and P95 pipeline execution time</p>
       </div>
-      <div style={{ WebkitTapHighlightColor: "transparent" }}>
       <ResponsiveContainer width="100%" height={220}>
-        <AreaChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }} style={{ outline: "none" }}>
+        <AreaChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
           <defs>
             <linearGradient id="gradAvg" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -73,7 +72,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
               name === "latencyMs" ? "Avg" : "P95",
             ]}
             labelStyle={{ color: "#a1a1aa", marginBottom: "4px" }}
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            cursor={false}
           />
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}
@@ -96,7 +95,6 @@ export default function LatencyChart({ data }: LatencyChartProps) {
           />
         </AreaChart>
       </ResponsiveContainer>
-      </div>
     </div>
   );
 }

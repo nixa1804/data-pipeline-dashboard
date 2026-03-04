@@ -29,9 +29,8 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
         <h2 className="text-sm font-semibold text-white">Run Volume — Last 7 days</h2>
         <p className="text-xs text-zinc-500 mt-0.5">Successful, failed and skipped runs per day</p>
       </div>
-      <div style={{ WebkitTapHighlightColor: "transparent" }}>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }} style={{ outline: "none" }}>
+        <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
           <XAxis
             dataKey="date"
@@ -52,7 +51,7 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
               fontSize: "12px",
               color: "#e4e4e7",
             }}
-            cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            cursor={false}
           />
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}
@@ -62,7 +61,6 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
           <Bar dataKey="skipped" name="Skipped" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} activeBar={{ fill: "#52525b", fillOpacity: 1 }} />
         </BarChart>
       </ResponsiveContainer>
-      </div>
     </div>
   );
 }

@@ -28,8 +28,11 @@ body {
   background: rgba(255, 255, 255, 0.15);
 }
 
+.recharts-wrapper,
+.recharts-surface,
+.recharts-wrapper *,
 .recharts-wrapper:focus,
-.recharts-surface:focus,
-.recharts-wrapper svg:focus {
-  outline: none;
+.recharts-surface:focus {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
