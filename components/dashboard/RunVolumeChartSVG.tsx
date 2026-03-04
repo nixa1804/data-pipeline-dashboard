@@ -135,9 +135,9 @@ export default function RunVolumeChartSVG({ data }: { data: DataPoint[] }) {
             y={H - 4}
             textAnchor="middle"
             fill="#71717a"
-            fontSize="10"
+            fontSize="13"
           >
-            {d.date.split(",")[0]}
+            {d.date.split(", ")[1] ?? d.date}
           </text>
         ))}
 

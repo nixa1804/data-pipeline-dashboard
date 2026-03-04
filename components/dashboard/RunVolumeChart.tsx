@@ -37,6 +37,8 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
             tick={{ fill: "#71717a", fontSize: 10 }}
             tickLine={false}
             axisLine={false}
+            interval={0}
+            tickFormatter={(val: string) => val.split(", ")[1] ?? val}
           />
           <YAxis
             tick={{ fill: "#71717a", fontSize: 10 }}
