@@ -58,9 +58,9 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}
           />
-          <Bar dataKey="success" name="Success" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} activeBar={{ fill: "#34d399", fillOpacity: 1 }} />
-          <Bar dataKey="failed" name="Failed" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} activeBar={{ fill: "#f87171", fillOpacity: 1 }} />
-          <Bar dataKey="skipped" name="Skipped" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} activeBar={{ fill: "#52525b", fillOpacity: 1 }} />
+          <Bar dataKey="success" name="Success" stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} activeBar={{ fill: "#34d399", fillOpacity: 1, stroke: "none", strokeWidth: 0 }} />
+          <Bar dataKey="failed" name="Failed" stackId="a" fill="#ef4444" radius={[0, 0, 0, 0]} activeBar={{ fill: "#f87171", fillOpacity: 1, stroke: "none", strokeWidth: 0 }} />
+          <Bar dataKey="skipped" name="Skipped" stackId="a" fill="#3f3f46" radius={[4, 4, 0, 0]} activeBar={{ fill: "#52525b", fillOpacity: 1, stroke: "none", strokeWidth: 0 }} />
         </BarChart>
       </ResponsiveContainer>
     </div>

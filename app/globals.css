@@ -28,6 +28,10 @@ body {
   background: rgba(255, 255, 255, 0.15);
 }
 
+.recharts-legend-item {
+  margin-right: 24px !important;
+}
+
 .recharts-wrapper,
 .recharts-surface,
 .recharts-wrapper *,

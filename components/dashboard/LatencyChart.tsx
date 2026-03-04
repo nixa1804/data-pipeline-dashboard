@@ -84,6 +84,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
             stroke="#6366f1"
             strokeWidth={2}
             fill="url(#gradAvg)"
+            activeDot={{ r: 3, fill: "#6366f1", stroke: "none" }}
           />
           <Area
             type="monotone"
@@ -92,6 +93,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
             strokeWidth={1.5}
             fill="url(#gradP95)"
             strokeDasharray="4 2"
+            activeDot={{ r: 3, fill: "#f59e0b", stroke: "none" }}
           />
         </AreaChart>
       </ResponsiveContainer>
