@@ -73,7 +73,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
               name === "latencyMs" ? "Avg" : "P95",
             ]}
             labelStyle={{ color: "#a1a1aa", marginBottom: "4px" }}
-            cursor={false}
+            cursor={{ fill: "rgba(255,255,255,0.04)" }}
           />
           <Legend
             wrapperStyle={{ fontSize: "11px", color: "#a1a1aa", paddingTop: "12px" }}

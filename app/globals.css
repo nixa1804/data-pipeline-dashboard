@@ -27,3 +27,9 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.15);
 }
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-wrapper svg:focus {
+  outline: none;
+}
