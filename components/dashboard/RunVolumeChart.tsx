@@ -34,6 +34,10 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
     return () => mq.removeEventListener("change", fn);
   }, []);
 
+  const chartData = compact
+    ? data.filter((d) => d.success + d.failed + d.skipped > 0)
+    : data;
+
   return (
     <div className="metrics-bar-chart bg-[#161b22] border border-white/5 rounded-xl p-5">
       <div className="mb-4">
@@ -41,14 +45,14 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
         <p className="text-xs text-zinc-500 mt-0.5">Successful, failed and skipped runs per day</p>
       </div>
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
+        <BarChart data={chartData} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
           <XAxis
             dataKey="date"
             tick={{ fill: "#71717a", fontSize: compact ? 11 : 13 }}
             tickLine={false}
             axisLine={false}
-            interval={compact ? 1 : 0}
+            interval={0}
           />
           <YAxis
             tick={{ fill: "#71717a", fontSize: 12 }}
