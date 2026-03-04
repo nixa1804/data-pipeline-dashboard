@@ -48,7 +48,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
           <XAxis
             dataKey="hour"
-            tick={{ fill: "#71717a", fontSize: 10 }}
+            tick={{ fill: "#71717a", fontSize: 13 }}
             tickLine={false}
             axisLine={false}
             interval={3}

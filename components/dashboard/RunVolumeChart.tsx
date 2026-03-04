@@ -34,7 +34,7 @@ export default function RunVolumeChart({ data }: RunVolumeChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" vertical={false} />
           <XAxis
             dataKey="date"
-            tick={{ fill: "#71717a", fontSize: 9 }}
+            tick={{ fill: "#71717a", fontSize: 13 }}
             tickLine={false}
             axisLine={false}
             interval={0}
